@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chess Timer</title>
+    <title>Timer</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <link rel="apple-touch-icon" href="icon.png">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     <style>
         .timer-container {
             display: flex;
@@ -14,6 +15,7 @@
             padding: 20px;
             height: 100vh;
             box-sizing: border-box;
+            padding-bottom: 80px;
         }
 
         .player-timer {
@@ -21,11 +23,15 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            text-align: center;
         }
 
         .time-display {
             font-size: 42px;
             margin: 10px 0;
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
         }
 
         .timer-button {
@@ -33,81 +39,148 @@
             padding: 30px;
             margin: 10px 0;
             font-size: 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
             -webkit-tap-highlight-color: transparent;
         }
 
         .timer-button:active {
             background-color: #45a049;
         }
+
+        .active {
+            background-color: #ff4444;
+        }
+
+        .reset-button {
+            position: relative;
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            min-width: 120px;
+        }
     </style>
 </head>
 <body>
-    <div class="timer-container">
-        <div class="player-timer">
-            <h2>Waste</h2>
-            <div class="time-display" id="player1-time">00:00</div>
-            <button class="timer-button" onclick="startTimer(1)">Go</button>
-        </div>
-        <div class="player-timer">
-            <h2>Not Waste</h2>
-            <div class="time-display" id="player2-time">00:00</div>
-            <button class="timer-button" onclick="startTimer(2)">Go</button>
-        </div>
-    </div>
+    <div id="root"></div>
 
-    <script>
-        let player1Seconds = 0;
-        let player2Seconds = 0;
-        let activeTimer = null;
-        let lastUpdate = null;
+    <script type="text/babel">
+        function Timer() {
+            // Load saved times from localStorage
+            const [player1Seconds, setPlayer1Seconds] = React.useState(
+                () => parseInt(localStorage.getItem('player1Time')) || 0
+            );
+            const [player2Seconds, setPlayer2Seconds] = React.useState(
+                () => parseInt(localStorage.getItem('player2Time')) || 0
+            );
+            const [activeTimer, setActiveTimer] = React.useState(null);
+            const [lastUpdate, setLastUpdate] = React.useState(null);
 
-        function formatTime(seconds) {
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-        }
+            // Save times whenever they change
+            React.useEffect(() => {
+                localStorage.setItem('player1Time', player1Seconds);
+                localStorage.setItem('player2Time', player2Seconds);
+            }, [player1Seconds, player2Seconds]);
 
-        function updateDisplay() {
-            document.getElementById('player1-time').textContent = formatTime(player1Seconds);
-            document.getElementById('player2-time').textContent = formatTime(player2Seconds);
-        }
+            // Timer update effect
+            React.useEffect(() => {
+                const interval = setInterval(() => {
+                    if (activeTimer && lastUpdate) {
+                        const now = Date.now();
+                        const elapsed = Math.floor((now - lastUpdate) / 1000);
+                        
+                        if (activeTimer === 1) {
+                            setPlayer1Seconds(prev => prev + elapsed);
+                        } else {
+                            setPlayer2Seconds(prev => prev + elapsed);
+                        }
+                        setLastUpdate(now);
+                    }
+                }, 1000);
 
-        function startTimer(player) {
-            const now = Date.now();
-            
-            if (activeTimer === player) {
-                return; // Same player clicked again, ignore
-            }
+                return () => clearInterval(interval);
+            }, [activeTimer, lastUpdate]);
 
-            if (lastUpdate && activeTimer) {
-                // Update the previous player's time
-                const elapsed = Math.floor((now - lastUpdate) / 1000);
-                if (activeTimer === 1) {
-                    player1Seconds += elapsed;
-                } else {
-                    player2Seconds += elapsed;
-                }
-                updateDisplay();
-            }
+            const formatTime = (seconds) => {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+            };
 
-            activeTimer = player;
-            lastUpdate = now;
-        }
-
-        // Update the display every second
-        setInterval(() => {
-            if (activeTimer && lastUpdate) {
+            const startTimer = (player) => {
                 const now = Date.now();
-                const elapsed = Math.floor((now - lastUpdate) / 1000);
-                if (activeTimer === 1) {
-                    player1Seconds += elapsed;
-                } else {
-                    player2Seconds += elapsed;
+
+                if (activeTimer === player) {
+                    setActiveTimer(null);
+                    setLastUpdate(null);
+                    return;
                 }
-                lastUpdate = now;
-                updateDisplay();
-            }
-        }, 1000);
+
+                if (lastUpdate && activeTimer) {
+                    const elapsed = Math.floor((now - lastUpdate) / 1000);
+                    if (activeTimer === 1) {
+                        setPlayer1Seconds(prev => prev + elapsed);
+                    } else {
+                        setPlayer2Seconds(prev => prev + elapsed);
+                    }
+                }
+
+                setActiveTimer(player);
+                setLastUpdate(now);
+            };
+
+            const resetTimers = () => {
+                if (confirm('Are you sure you want to reset all timers?')) {
+                    setPlayer1Seconds(0);
+                    setPlayer2Seconds(0);
+                    setActiveTimer(null);
+                    setLastUpdate(null);
+                    localStorage.setItem('player1Time', 0);
+                    localStorage.setItem('player2Time', 0);
+                }
+            };
+
+            return (
+                <div className="timer-container">
+                    <div className="player-timer">
+                        <h2>Waste</h2>
+                        <div className="time-display">
+                            {formatTime(player1Seconds)}
+                        </div>
+                        <button 
+                            className={`timer-button ${activeTimer === 1 ? 'active' : ''}`}
+                            onClick={() => startTimer(1)}>
+                            {activeTimer === 1 ? 'Stop' : 'Go'}
+                        </button>
+                    </div>
+                    <div className="player-timer">
+                        <h2>Not Waste</h2>
+                        <div className="time-display">
+                            {formatTime(player2Seconds)}
+                        </div>
+                        <button 
+                            className={`timer-button ${activeTimer === 2 ? 'active' : ''}`}
+                            onClick={() => startTimer(2)}>
+                            {activeTimer === 2 ? 'Stop' : 'Go'}
+                        </button>
+                    </div>
+                    <button className="reset-button" onClick={resetTimers}>
+                        Reset All
+                    </button>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Timer />);
     </script>
 </body>
 </html> 
