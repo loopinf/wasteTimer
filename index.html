@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chess Timer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon" href="icon.png">
+    <style>
+        .timer-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .player-timer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .time-display {
+            font-size: 42px;
+            margin: 10px 0;
+        }
+
+        .timer-button {
+            width: 100%;
+            padding: 30px;
+            margin: 10px 0;
+            font-size: 24px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .timer-button:active {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer-container">
+        <div class="player-timer">
+            <h2>Waste</h2>
+            <div class="time-display" id="player1-time">00:00</div>
+            <button class="timer-button" onclick="startTimer(1)">Go</button>
+        </div>
+        <div class="player-timer">
+            <h2>Not Waste</h2>
+            <div class="time-display" id="player2-time">00:00</div>
+            <button class="timer-button" onclick="startTimer(2)">Go</button>
+        </div>
+    </div>
+
+    <script>
+        let player1Seconds = 0;
+        let player2Seconds = 0;
+        let activeTimer = null;
+        let lastUpdate = null;
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            document.getElementById('player1-time').textContent = formatTime(player1Seconds);
+            document.getElementById('player2-time').textContent = formatTime(player2Seconds);
+        }
+
+        function startTimer(player) {
+            const now = Date.now();
+            
+            if (activeTimer === player) {
+                return; // Same player clicked again, ignore
+            }
+
+            if (lastUpdate && activeTimer) {
+                // Update the previous player's time
+                const elapsed = Math.floor((now - lastUpdate) / 1000);
+                if (activeTimer === 1) {
+                    player1Seconds += elapsed;
+                } else {
+                    player2Seconds += elapsed;
+                }
+                updateDisplay();
+            }
+
+            activeTimer = player;
+            lastUpdate = now;
+        }
+
+        // Update the display every second
+        setInterval(() => {
+            if (activeTimer && lastUpdate) {
+                const now = Date.now();
+                const elapsed = Math.floor((now - lastUpdate) / 1000);
+                if (activeTimer === 1) {
+                    player1Seconds += elapsed;
+                } else {
+                    player2Seconds += elapsed;
+                }
+                lastUpdate = now;
+                updateDisplay();
+            }
+        }, 1000);
+    </script>
+</body>
+</html> 
