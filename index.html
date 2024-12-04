@@ -7,90 +7,39 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <style>
-        .timer-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 20px;
-            height: 100vh;
-            box-sizing: border-box;
-            padding-bottom: 80px;
-        }
-
-        .player-timer {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .time-display {
-            font-size: 42px;
-            margin: 10px 0;
-            background: #f0f0f0;
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        .timer-button {
-            width: 100%;
-            padding: 30px;
-            margin: 10px 0;
-            font-size: 24px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .timer-button:active {
-            background-color: #45a049;
-        }
-
-        .active {
-            background-color: #ff4444;
-        }
-
-        .reset-button {
-            position: relative;
-            margin: 20px auto;
-            display: block;
-            padding: 10px 20px;
-            background-color: #ff4444;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 18px;
-            min-width: 120px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="root"></div>
-
     <script type="text/babel">
+        // Utils
+        const formatTime = (seconds) => {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+        };
+
+        const storage = {
+            getTime: (player) => parseInt(localStorage.getItem(`player${player}Time`)) || 0,
+            setTime: (player, time) => localStorage.setItem(`player${player}Time`, time),
+            resetAll: () => {
+                localStorage.setItem('player1Time', 0);
+                localStorage.setItem('player2Time', 0);
+            }
+        };
+
+        // Timer Component
         function Timer() {
-            // Load saved times from localStorage
-            const [player1Seconds, setPlayer1Seconds] = React.useState(
-                () => parseInt(localStorage.getItem('player1Time')) || 0
-            );
-            const [player2Seconds, setPlayer2Seconds] = React.useState(
-                () => parseInt(localStorage.getItem('player2Time')) || 0
-            );
+            const [player1Seconds, setPlayer1Seconds] = React.useState(() => storage.getTime(1));
+            const [player2Seconds, setPlayer2Seconds] = React.useState(() => storage.getTime(2));
             const [activeTimer, setActiveTimer] = React.useState(null);
             const [lastUpdate, setLastUpdate] = React.useState(null);
 
-            // Save times whenever they change
             React.useEffect(() => {
-                localStorage.setItem('player1Time', player1Seconds);
-                localStorage.setItem('player2Time', player2Seconds);
+                storage.setTime(1, player1Seconds);
+                storage.setTime(2, player2Seconds);
             }, [player1Seconds, player2Seconds]);
 
-            // Timer update effect
             React.useEffect(() => {
                 const interval = setInterval(() => {
                     if (activeTimer && lastUpdate) {
@@ -108,12 +57,6 @@
 
                 return () => clearInterval(interval);
             }, [activeTimer, lastUpdate]);
-
-            const formatTime = (seconds) => {
-                const minutes = Math.floor(seconds / 60);
-                const remainingSeconds = seconds % 60;
-                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-            };
 
             const startTimer = (player) => {
                 const now = Date.now();
@@ -143,8 +86,7 @@
                     setPlayer2Seconds(0);
                     setActiveTimer(null);
                     setLastUpdate(null);
-                    localStorage.setItem('player1Time', 0);
-                    localStorage.setItem('player2Time', 0);
+                    storage.resetAll();
                 }
             };
 

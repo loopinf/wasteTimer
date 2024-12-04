@@ -1,0 +1,59 @@
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+    padding-bottom: 80px;
+}
+
+.player-timer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+
+.time-display {
+    font-size: 42px;
+    margin: 10px 0;
+    background: #f0f0f0;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.timer-button {
+    width: 100%;
+    padding: 30px;
+    margin: 10px 0;
+    font-size: 24px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.timer-button:active {
+    background-color: #45a049;
+}
+
+.active {
+    background-color: #ff4444;
+}
+
+.reset-button {
+    position: relative;
+    margin: 20px auto;
+    display: block;
+    padding: 10px 20px;
+    background-color: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    min-width: 120px;
+} 
