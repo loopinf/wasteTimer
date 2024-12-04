@@ -107,7 +107,7 @@
                         <p>wqu 10min | 10 push-up </p>
                         <div className="time-display">
                             {'💀'.repeat(Math.floor(player2Seconds / 3600 ))}
-                            <br />
+                            {Math.floor(player2Seconds / 3600) > 0 && <br />}
                             {formatTime(player1Seconds)}
                         </div>
                         <button 
@@ -131,7 +131,7 @@
                         <h2>Not Waste</h2>
                         <div className="time-display">
                             {'🍅'.repeat(Math.floor(player2Seconds / 3600 ))}
-                            <br />
+                            {Math.floor(player2Seconds / 3600) > 0 && <br />}
                             {formatTime(player2Seconds)} 
                         </div>
                         <button 
@@ -151,4 +151,4 @@
         root.render(<Timer />);
     </script>
 </body>
-</html> 
+</html>
