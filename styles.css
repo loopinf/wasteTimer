@@ -57,10 +57,11 @@ h2 {
     color: white; /* White text */
     border: none; /* No border */
     border-radius: 5px; /* Rounded corners */
-    padding: 10px 15px; /* Padding inside button */
+    padding: 15px; /* Increase padding for larger buttons */
     cursor: pointer; /* Pointer cursor on hover */
-    font-size: 1em; /* Font size */
+    font-size: 1.2em; /* Increase font size */
     transition: background-color 0.3s; /* Smooth transition */
+    width: 80%; /* Extend horizontally */
 }
 
 .timer-button:hover {
@@ -93,4 +94,4 @@ h2 {
         flex: 1 1 30%;
         min-width: 200px;
     }
-} 
+}
