@@ -31,6 +31,24 @@
             }
         };
 
+        // CurrentDateTime Component
+        function CurrentDateTime() {
+            const [currentDateTime, setCurrentDateTime] = React.useState(new Date());
+
+            React.useEffect(() => {
+                const interval = setInterval(() => {
+                    setCurrentDateTime(new Date());
+                }, 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="current-date-time">
+                    {currentDateTime.toLocaleString()}
+                </div>
+            );
+        }
+
         // Timer Component
         function Timer() {
             const [player1Seconds, setPlayer1Seconds] = React.useState(() => storage.getTime(1));
@@ -102,6 +120,7 @@
 
             return (
                 <div className="timer-container">
+                    <CurrentDateTime />
                     <div className="player-timer">
                         <h2>Waste</h2>
                         <p>wqu 10min | 10 push-up </p>
